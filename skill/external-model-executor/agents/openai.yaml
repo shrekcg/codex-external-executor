@@ -1,0 +1,4 @@
+interface:
+  display_name: "External Model Executor"
+  short_description: "Delegate Codex tasks to external model APIs"
+  default_prompt: "Use $external-model-executor to delegate this task to a configured external-model sub-agent, then verify and report the result."

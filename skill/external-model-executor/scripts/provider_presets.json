@@ -1,0 +1,118 @@
+{
+  "openai": {
+    "label": "OpenAI official API",
+    "protocol": "responses",
+    "base_url": "https://api.openai.com/v1",
+    "api_key_env": "OPENAI_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["responses", "streaming", "function_tools", "custom_tools", "reasoning", "prompt_cache"]
+  },
+  "deepseek": {
+    "label": "DeepSeek official API",
+    "protocol": "responses",
+    "base_url": "https://api.deepseek.com",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "auth": "bearer",
+    "drop_request_fields": ["conversation", "previous_response_id", "store"],
+    "capabilities": ["responses", "streaming", "function_tools", "prompt_cache"],
+    "limitations": ["no_reasoning_encrypted_content", "partial_codex_tools"]
+  },
+  "groq": {
+    "label": "Groq official API",
+    "protocol": "responses",
+    "base_url": "https://api.groq.com/openai/v1",
+    "api_key_env": "GROQ_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["responses", "streaming", "function_tools"]
+  },
+  "anthropic": {
+    "label": "Anthropic Claude official API",
+    "protocol": "anthropic_messages",
+    "base_url": "https://api.anthropic.com/v1",
+    "api_key_env": "ANTHROPIC_API_KEY",
+    "auth": "anthropic",
+    "capabilities": ["streaming", "function_tools", "prompt_cache"],
+    "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
+  },
+  "kimi": {
+    "label": "Kimi official API",
+    "protocol": "openai_chat",
+    "base_url": "https://api.moonshot.cn/v1",
+    "api_key_env": "MOONSHOT_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["streaming", "function_tools", "prompt_cache"],
+    "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
+  },
+  "minimax-cn": {
+    "label": "MiniMax official API (China)",
+    "protocol": "openai_chat",
+    "base_url": "https://api.minimaxi.com/v1",
+    "api_key_env": "MINIMAX_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["streaming", "function_tools", "prompt_cache"],
+    "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
+  },
+  "minimax-global": {
+    "label": "MiniMax official API (Global)",
+    "protocol": "openai_chat",
+    "base_url": "https://api.minimax.io/v1",
+    "api_key_env": "MINIMAX_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["streaming", "function_tools", "prompt_cache"],
+    "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
+  },
+  "zhipu": {
+    "label": "Zhipu GLM official API",
+    "protocol": "openai_chat",
+    "base_url": "https://open.bigmodel.cn/api/paas/v4",
+    "api_key_env": "ZAI_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["streaming", "function_tools"],
+    "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
+  },
+  "qwen-cn": {
+    "label": "Alibaba Cloud Model Studio / Qwen (China)",
+    "protocol": "openai_chat",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "api_key_env": "DASHSCOPE_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["streaming", "function_tools"],
+    "limitations": ["responses_translation", "custom_tools_translated_to_functions", "regional_base_url_may_be_preferred"]
+  },
+  "qwen-global": {
+    "label": "Alibaba Cloud Model Studio / Qwen (Global)",
+    "protocol": "openai_chat",
+    "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+    "api_key_env": "DASHSCOPE_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["streaming", "function_tools"],
+    "limitations": ["responses_translation", "custom_tools_translated_to_functions", "regional_base_url_may_be_preferred"]
+  },
+  "custom-responses": {
+    "label": "Custom or relay Responses API",
+    "protocol": "responses",
+    "base_url": "",
+    "api_key_env": "EXTERNAL_MODEL_API_KEY",
+    "auth": "bearer",
+    "capabilities": ["responses"],
+    "limitations": ["capabilities_require_live_probe"]
+  },
+  "custom-openai-chat": {
+    "label": "Custom or relay OpenAI Chat Completions API",
+    "protocol": "openai_chat",
+    "base_url": "",
+    "api_key_env": "EXTERNAL_MODEL_API_KEY",
+    "auth": "bearer",
+    "capabilities": [],
+    "limitations": ["responses_translation", "capabilities_require_live_probe"]
+  },
+  "custom-anthropic": {
+    "label": "Custom or relay Anthropic Messages API",
+    "protocol": "anthropic_messages",
+    "base_url": "",
+    "api_key_env": "EXTERNAL_MODEL_API_KEY",
+    "auth": "anthropic",
+    "capabilities": [],
+    "limitations": ["responses_translation", "capabilities_require_live_probe"]
+  }
+}

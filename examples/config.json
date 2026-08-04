@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8787
+  },
+  "routes": {
+    "deepseek": {
+      "provider": "deepseek",
+      "model": "deepseek-v4-flash",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "brief_mode": "auto"
+    },
+    "company-relay": {
+      "provider": "custom-openai-chat",
+      "model": "vendor/model-id",
+      "base_url": "https://relay.example.com/v1",
+      "api_key_env": "COMPANY_RELAY_API_KEY",
+      "brief_mode": "always"
+    }
+  }
+}
