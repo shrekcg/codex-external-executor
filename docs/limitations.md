@@ -1,44 +1,27 @@
-# Limitations and design decisions
+# 限制与设计取舍
 
-## Responses is a family of behaviors, not only an endpoint name
+## Responses 不只是端点名称
 
-Providers can expose `/responses` while omitting state, encrypted reasoning,
-custom tools, built-in tools, or particular SSE events. Presets document known
-differences, while live probes establish current behavior.
+Provider 可能暴露 `/responses`，但不支持状态、加密推理、自定义工具、内置工具或特定 SSE 事件。Preset 记录已知差异，live probe 才能确认当前行为。
 
-## Tool translation is necessarily lossy
+## 工具转换存在损耗
 
-OpenAI Chat Completions and Anthropic Messages have function/tool primitives,
-but they do not implement every Responses tool type. This gateway translates
-ordinary functions and custom text tools. Provider-hosted built-in tools are not
-emulated.
+OpenAI Chat Completions 和 Anthropic Messages 都有函数/工具原语，但不一定实现 Responses 的全部工具类型。网关只转换普通函数和自定义文本工具，不模拟 Provider 自带工具。
 
-Responses custom tools are represented upstream as a function with one string
-property, `input`. This works only when the model preserves the tool name and
-valid JSON arguments.
+Responses 自定义工具在上游会被表示为只有一个字符串属性 `input` 的函数。只有当模型保留工具名并生成合法 JSON 参数时才可靠。
 
-## Translated streaming is buffered
+## 转换协议的流式输出会缓冲
 
-Native Responses streams are passed through. For translated protocols, the
-gateway currently completes one upstream turn before emitting the downstream
-Responses SSE sequence. This prioritizes deterministic tool-call reconstruction
-over token-level latency.
+原生 Responses 直接透传。Chat 与 Anthropic 转换路径会先完成一轮上游请求，再发出下游 Responses SSE 序列，优先保证工具调用重建的确定性，而不是 token 级延迟。
 
-## State is reconstructed from Codex input
+## 状态由 Codex 输入重建
 
-Translated routes do not implement provider-side `previous_response_id` state.
-They convert the input items supplied by Codex on each turn. Relays that drop
-history can still fail; brief mode handles only the task contract, not arbitrary
-conversation reconstruction.
+转换路径不实现 Provider 侧 `previous_response_id` 状态，而是把 Codex 每轮提供的 input 转换给上游。如果中转站丢弃历史，仍可能失败；brief 只能提供任务合同，不能重建任意对话历史。
 
-## Model capability is outside the adapter
+## 模型能力不由适配器补齐
 
-The adapter cannot make a text-only model call tools accurately, enlarge a
-context window, remove content-policy restrictions, or guarantee valid patches.
-The main Agent must keep tasks bounded and verify the output.
+适配器不能让纯文本模型准确调用工具、扩大上下文窗口、移除内容策略限制或保证补丁正确。主 Agent 必须限制任务范围并核验输出。
 
-## Billing remains separate
+## 计费分开
 
-External sub-agent tokens are billed by the selected API or relay. The main
-Codex Agent still uses the user's Codex plan or configured main-provider billing
-for delegation, monitoring, verification, and final output.
+外部子 Agent token 由选中的 API 或中转站计费。主 Codex Agent 仍会因为委派、监控、核验和最终输出使用 Codex 计划或主 Provider 额度。

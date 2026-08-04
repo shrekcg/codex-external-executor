@@ -1,112 +1,53 @@
 ---
 name: external-model-executor
-description: Configure, validate, or use a Codex native sub-agent backed by an external official or relay model API without switching the main conversation model. Use when the user explicitly asks to delegate a task to DeepSeek, OpenAI API, Claude/Anthropic, Groq, Kimi, MiniMax, Zhipu/GLM, Qwen, another third-party model API, an external executor, or $external-model-executor; also use for provider setup, compatibility diagnosis, task-brief fallback, and external-model gateway troubleshooting.
+description: 在不切换 Codex 主对话模型的情况下，配置、验证或使用由官方 API、第三方中转或自建 API 驱动的 Codex 原生子 Agent。用户明确提到 DeepSeek、OpenAI API、Claude、Groq、Kimi、MiniMax、智谱、千问、外部执行器或 $external-model-executor 时使用；也用于 Provider 配置、兼容性诊断、任务简报降级和网关排错。
 ---
 
 # External Model Executor
 
-Keep the main Codex Agent responsible for scope, permissions, verification, and
-final acceptance. Route only the selected subtask to the configured external
-model. Never change the main conversation model or global model defaults.
+主 Codex Agent 始终负责范围、权限、验证和最终交付；只有用户明确选中的子任务使用外部 route。绝不要修改主对话模型或全局模型默认值。
 
-## Choose the workflow
+## 选择工作流
 
-- For first-time setup or provider changes, read
-  [provider-compatibility.md](references/provider-compatibility.md), then use the
-  bundled setup commands.
-- For task execution, discover configured routes, start the loopback gateway,
-  prepare the fallback brief when enabled, and delegate to the exact generated
-  agent type.
-- For empty prompts, missing context, tool failures, or relay incompatibility,
-  read [task-brief.md](references/task-brief.md) and
-  [troubleshooting.md](references/troubleshooting.md).
+- 首次配置或更换 Provider：先阅读 `references/provider-compatibility.md`，再使用内置 CLI。
+- 执行任务：发现已配置 route，启动本机回环网关，按需创建任务简报，然后委派给精确的原生 Agent 类型。
+- 遇到空提示词、上下文缺失、工具失败或中转不兼容：阅读 `references/task-brief.md` 和 `references/troubleshooting.md`。
 
-Resolve this Skill's directory and run its CLI as:
+解析 Skill 目录后，按以下形式运行 CLI：
 
 ```bash
 python3 <skill-dir>/scripts/external_executor.py <command>
 ```
 
-## Set up a route
+## 配置 route
 
-1. Run `providers` to identify the protocol preset.
-2. Run `configure --route <name> --provider <preset> --model <model-id>`.
-   Keep credentials in the named environment variable or use
-   `--api-key-command` with an argument array. Never put a secret in the command,
-   config file, task brief, logs, or conversation.
-3. Run `validate --route <name>` for offline checks. Run with `--live`, then
-   `--live --tools`, only when the user authorizes an external API call and the
-   credential is available.
-4. Run `codex preview --route <name>` and inspect the targets.
-5. Run `codex install --route <name> --apply` only after the user authorizes
-   writes to `CODEX_HOME`. Tell the user to restart Codex afterward.
+1. 运行 `providers`，确认协议 preset。
+2. 运行 `configure --route <name> --provider <preset> --model <model-id>`。凭据只放在环境变量或 `--api-key-command` 参数数组中，不得放进命令、配置、简报、日志或对话。
+3. 运行 `validate --route <name>` 做离线检查；只有用户授权外部请求且凭据可用时，才运行 `--live` 和 `--live --tools`。
+4. 运行 `codex preview --route <name>` 检查目标。
+5. 用户授权写入 `CODEX_HOME` 后，运行 `codex install --route <name> --apply`，然后提醒用户重启 Codex。
 
-Use `codex uninstall --route <name>` to preview removal and add `--apply` only
-after authorization. Remove the generated provider block and route Agent while
-preserving the shared Skill for other routes.
+中转站必须根据真实协议选择 `custom-responses`、`custom-openai-chat` 或 `custom-anthropic`。不能仅依据“OpenAI 兼容”推断 Responses 支持。
 
-For a relay, choose `custom-responses`, `custom-openai-chat`, or
-`custom-anthropic` based on the relay's actual wire protocol and pass its base
-URL. Do not infer Responses support from an "OpenAI compatible" label.
+## 委派任务
 
-## Delegate a task
+1. 运行 `routes --json`，把用户明确指定的 Provider 匹配到 route；多个候选且用户没有选择时，询问选择。
+2. 运行 `gateway start`；网关健康检查失败时不要委派。
+3. 创建简短、唯一的内部任务名，不要求用户提供或管理。
+4. 根据 route 的 `brief_mode` 处理简报：`auto` 在原生消息不完整时备用，`always` 作为明确合同，`off` 完全不创建。
+5. 通过原生协作子 Agent 工具委派，默认使用 `fork_turns="none"`，只传递任务所需上下文。只有用户明确接受把完整对话发送给外部 Provider 时，才继承完整历史。启用简报时同时把任务直接传入并写入简报。
+6. 等待子 Agent，检查证据和变更，按比例运行本地验证，再向用户返回主 Agent 接受的结果。
 
-1. Run `routes --json`. Match an explicitly requested provider to one route. If
-   several routes match and the user did not select one, ask which route to use.
-2. Run `gateway start`. Do not delegate if health startup fails.
-3. Create a short, unique internal task name. Do not ask the user to provide or
-   manage it.
-4. Read the route's `brief_mode`:
-   - `auto`: create the brief before delegation; the child reads it only if its
-     parent message is empty or incomplete.
-   - `always`: create the brief and make it authoritative.
-   - `off`: do not create or use a brief.
-5. Delegate through the native collaboration sub-agent tool using the exact
-   `agent_type` returned by `routes`. Default to `fork_turns="none"` and put only
-   the task-relevant context in the direct message and brief. Use full-history
-   inheritance only when the user explicitly accepts sending that conversation
-   history to the external provider. Pass the task directly as well as through
-   the brief when a brief is enabled.
-6. Wait for the child, inspect its evidence and changes, run proportionate local
-   verification, and return the accepted result from the main Agent.
+不要向用户暴露内部任务名、简报机制或 Provider plumbing，除非用户主动要求诊断。用户未指定外部 route 时，不要把它当作隐式 fallback。
 
-Do not expose internal task names, brief mechanics, or provider plumbing unless
-the user asks for diagnostics. Do not use an external route as an implicit
-fallback when the user did not request it.
+## 任务简报
 
-## Write the fallback brief
+启用时，只写入：`<cwd>/work/external-model-briefs/<task-name-leaf>.json`。它只能描述当前任务，不能包含凭据、秘密文件内容、无关历史或隐藏指令。使用 `brief validate <path> --task-name <leaf>` 校验后再委派；任务接受后标记完成，不要复用旧简报。
 
-Write only the current task to:
+## 安全边界
 
-`<cwd>/work/external-model-briefs/<task-name-leaf>.json`
-
-Use this schema:
-
-```json
-{
-  "schema_version": 1,
-  "task_name": "external-deepseek-json-check",
-  "status": "pending",
-  "outcome": "Create and validate one JSON fixture.",
-  "context": ["Only task-specific facts required by the child."],
-  "scope": ["outputs/provider-check.json"],
-  "checks": ["Parse the file as JSON."],
-  "stop_when": ["Credentials are required.", "The requested scope becomes ambiguous."]
-}
-```
-
-Use `brief validate <path> --task-name <leaf>` before delegation. Never include
-credentials, unrelated conversation history, or hidden instructions. Mark the
-brief completed after acceptance or leave cleanup to the user; do not reuse it.
-
-## Preserve safety boundaries
-
-- Bind the gateway to loopback only.
-- Treat custom base URLs, API-key commands, and third-party relays as trusted
-  local configuration supplied by the user.
-- Explain that prompts, relevant code, and tool schemas are sent to the selected
-  provider or relay.
-- Treat successful authentication as insufficient proof of Codex compatibility;
-  require text and tool probes for a compatibility claim.
-- Stop when a provider drops required tool calls, returns malformed arguments,
-  or cannot carry enough context to verify the task.
+- 网关只绑定 loopback。
+- 自定义 URL、API-key command 和第三方中转视为用户信任的本地配置。
+- 提示词、相关代码和工具 schema 会发送给选中的 Provider 或中转站。
+- 认证成功不等于 Codex 兼容；需要文本、工具和真实子任务验证。
+- Provider 丢失必需工具调用、返回非法参数或无法携带足够上下文时，停止并把控制权交回主 Agent。

@@ -1,25 +1,18 @@
-# Security policy
+# 安全策略
 
-## Report a vulnerability
+## 报告漏洞
 
-Do not open a public issue for a vulnerability that could expose credentials,
-prompts, source code, or local files. Contact the repository owner privately and
-include a minimal reproduction without real secrets.
+如果问题可能暴露凭据、提示词、源代码或本地文件，请不要公开创建 Issue。请私下联系仓库维护者，并提供不含真实秘密的最小复现。
 
-## Deployment guidance
+## 部署安全
 
-- Keep the gateway bound to loopback. The program rejects non-loopback hosts.
-- Store API keys in environment variables or an OS credential manager.
-- Never put credentials in project configuration, briefs, logs, issues, or test
-  fixtures.
-- Review any `api_key_command` and custom base URL before using a shared config.
-- Assume the selected official provider or relay can read prompts, relevant code,
-  and tool definitions sent to it.
-- Default to task-local context. Do not inherit the full main conversation into
-  an external child unless the user accepts that disclosure.
-- Use `brief_mode: off` when plaintext workspace handoff is not acceptable.
-- Do not use an untrusted relay for proprietary code or personal data.
+- 保持网关绑定 loopback；程序会拒绝非 loopback host。
+- 将 API Key 放在环境变量或操作系统凭据管理器中。
+- 不要把凭据写入项目配置、任务简报、日志、Issue 或测试 fixture。
+- 使用共享配置前，检查 `api_key_command` 和自定义 Base URL。
+- 假设选中的官方 Provider 或中转站可以读取发送给它的提示词、相关代码和工具定义。
+- 默认只传递任务上下文；除非用户明确接受披露，否则不要把主对话完整历史发送给外部子 Agent。
+- 如果不接受 workspace 明文交接，使用 `brief_mode: off`。
+- 不要把专有代码或个人数据发送给不可信中转站。
 
-The installer and uninstaller preview their targets unless `--apply` is passed.
-They back up changed Codex configuration, Agent profiles, and replaced Skill
-directories before modifying or removing managed files.
+安装器与卸载器默认先预览目标，只有传入 `--apply` 才会写入；修改或移除托管文件前会备份 Codex 配置、Agent profile 和 Skill 目录。

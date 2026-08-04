@@ -1,6 +1,6 @@
 {
   "openai": {
-    "label": "OpenAI official API",
+    "label": "OpenAI 官方 API",
     "protocol": "responses",
     "base_url": "https://api.openai.com/v1",
     "api_key_env": "OPENAI_API_KEY",
@@ -8,7 +8,7 @@
     "capabilities": ["responses", "streaming", "function_tools", "custom_tools", "reasoning", "prompt_cache"]
   },
   "deepseek": {
-    "label": "DeepSeek official API",
+    "label": "DeepSeek 官方 API",
     "protocol": "responses",
     "base_url": "https://api.deepseek.com",
     "api_key_env": "DEEPSEEK_API_KEY",
@@ -18,7 +18,7 @@
     "limitations": ["no_reasoning_encrypted_content", "partial_codex_tools"]
   },
   "groq": {
-    "label": "Groq official API",
+    "label": "Groq 官方 API",
     "protocol": "responses",
     "base_url": "https://api.groq.com/openai/v1",
     "api_key_env": "GROQ_API_KEY",
@@ -26,7 +26,7 @@
     "capabilities": ["responses", "streaming", "function_tools"]
   },
   "anthropic": {
-    "label": "Anthropic Claude official API",
+    "label": "Anthropic Claude 官方 API",
     "protocol": "anthropic_messages",
     "base_url": "https://api.anthropic.com/v1",
     "api_key_env": "ANTHROPIC_API_KEY",
@@ -35,7 +35,7 @@
     "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
   },
   "kimi": {
-    "label": "Kimi official API",
+    "label": "Kimi 官方 API",
     "protocol": "openai_chat",
     "base_url": "https://api.moonshot.cn/v1",
     "api_key_env": "MOONSHOT_API_KEY",
@@ -44,7 +44,7 @@
     "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
   },
   "minimax-cn": {
-    "label": "MiniMax official API (China)",
+    "label": "MiniMax 官方 API（国内）",
     "protocol": "openai_chat",
     "base_url": "https://api.minimaxi.com/v1",
     "api_key_env": "MINIMAX_API_KEY",
@@ -53,7 +53,7 @@
     "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
   },
   "minimax-global": {
-    "label": "MiniMax official API (Global)",
+    "label": "MiniMax 官方 API（国际）",
     "protocol": "openai_chat",
     "base_url": "https://api.minimax.io/v1",
     "api_key_env": "MINIMAX_API_KEY",
@@ -62,7 +62,7 @@
     "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
   },
   "zhipu": {
-    "label": "Zhipu GLM official API",
+    "label": "智谱 GLM 官方 API",
     "protocol": "openai_chat",
     "base_url": "https://open.bigmodel.cn/api/paas/v4",
     "api_key_env": "ZAI_API_KEY",
@@ -71,7 +71,7 @@
     "limitations": ["responses_translation", "custom_tools_translated_to_functions"]
   },
   "qwen-cn": {
-    "label": "Alibaba Cloud Model Studio / Qwen (China)",
+    "label": "阿里云百炼 / 千问（国内）",
     "protocol": "openai_chat",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "api_key_env": "DASHSCOPE_API_KEY",
@@ -80,7 +80,7 @@
     "limitations": ["responses_translation", "custom_tools_translated_to_functions", "regional_base_url_may_be_preferred"]
   },
   "qwen-global": {
-    "label": "Alibaba Cloud Model Studio / Qwen (Global)",
+    "label": "阿里云百炼 / 千问（国际）",
     "protocol": "openai_chat",
     "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
     "api_key_env": "DASHSCOPE_API_KEY",
@@ -89,7 +89,7 @@
     "limitations": ["responses_translation", "custom_tools_translated_to_functions", "regional_base_url_may_be_preferred"]
   },
   "custom-responses": {
-    "label": "Custom or relay Responses API",
+    "label": "自定义或中转 Responses API",
     "protocol": "responses",
     "base_url": "",
     "api_key_env": "EXTERNAL_MODEL_API_KEY",
@@ -98,7 +98,7 @@
     "limitations": ["capabilities_require_live_probe"]
   },
   "custom-openai-chat": {
-    "label": "Custom or relay OpenAI Chat Completions API",
+    "label": "自定义或中转 OpenAI Chat Completions API",
     "protocol": "openai_chat",
     "base_url": "",
     "api_key_env": "EXTERNAL_MODEL_API_KEY",
@@ -107,7 +107,7 @@
     "limitations": ["responses_translation", "capabilities_require_live_probe"]
   },
   "custom-anthropic": {
-    "label": "Custom or relay Anthropic Messages API",
+    "label": "自定义或中转 Anthropic Messages API",
     "protocol": "anthropic_messages",
     "base_url": "",
     "api_key_env": "EXTERNAL_MODEL_API_KEY",

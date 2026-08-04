@@ -1,52 +1,49 @@
 # Codex External Executor
 
 <p align="center">
-  <img src="assets/readme/hero.svg" alt="Codex External Executor: Codex keeps control while one native child agent routes through a local gateway to an official API or relay" width="100%">
+  <img src="assets/readme/hero.svg" alt="Codex 保持主控，将选中的子任务经本地网关路由到官方 API、第三方中转或自建 API" width="100%">
 </p>
 
-<p align="center"><strong>Use an external model API for one Codex child task—without switching the main conversation.</strong></p>
+<p align="center"><strong>不切换 Codex 主对话模型，临时把一个子任务交给外部模型 API。</strong></p>
 
-<p align="center"><a href="README.zh-CN.md">简体中文</a> · <a href="docs/architecture.md">Architecture</a> · <a href="docs/providers.md">Provider catalog</a> · <a href="docs/deployment.md">Deployment</a> · <a href="docs/limitations.md">Limitations</a></p>
+<p align="center"><a href="README.en.md">English</a> · <a href="docs/best-practices.md">最佳实践</a> · <a href="docs/architecture.md">架构</a> · <a href="docs/providers.md">Provider 清单</a> · <a href="docs/deployment.md">部署</a> · <a href="docs/limitations.md">限制</a></p>
 
-Codex External Executor is a reusable Codex Skill for selectively delegating a bounded task to an external model API. Codex remains the parent: it owns permissions, workspace access, verification, and the final response. Only the chosen native child-agent route uses the external provider.
+Codex External Executor 是一个通用 Codex Skill：主 Agent 继续负责权限、工作区、验证和最终交付，只有明确选中的原生子 Agent route 使用外部 API。没有指定外部 route 时，原有 Codex 与 Team Mode 工作流不变。
 
-## What it changes
+## 它解决什么问题
 
 ```text
-Main Codex conversation  ── stays on its normal model and plan
+Codex 主对话（保持原模型）
         │
-        └── selected task → generated native child agent → local gateway → external API
+        └── 选中的任务 → 原生子 Agent → 本机回环网关 → 外部模型 API
 ```
 
-- Keeps the original Codex workflow intact when no external route is selected.
-- Adds one explicit, route-specific native child-agent profile per provider.
-- Bridges Codex Responses, OpenAI Chat Completions, and Anthropic Messages APIs.
-- Keeps API keys out of Codex provider configuration and out of this repository.
+- 不需要全局切换 Codex 主模型。
+- 每个 Provider 使用独立、可审计的 route 配置。
+- 兼容 Codex Responses、OpenAI Chat Completions、Anthropic Messages 三类协议。
+- API Key 不写入仓库、Codex provider 配置、任务简报或日志。
 
-The user-facing invocation stays simple:
+日常调用保持简单：
 
 ```text
-Use $external-model-executor and let the DeepSeek route create and validate a
-small JSON file in the current project. Return the path and verification result.
+使用 $external-model-executor，让 DeepSeek route 在当前项目创建并验证一个简单 JSON 文件，完成后告诉我路径和验证结果。
 ```
 
-Internal task names and fallback briefs are implementation details, not prompt requirements for the user.
+用户不需要管理内部任务名、父子 Agent 关系或任务简报；这些是实现细节。
 
-## Provider catalog
+## Provider 分类
 
-The route is selected by the provider's real wire protocol, not only by an "OpenAI-compatible" label. Model IDs are supplied by the user and validated live, because each provider's catalog changes independently.
-
-| Group | Built-in presets | Protocol path |
+| 分类 | 内置预设 | 协议路径 |
 |---|---|---|
-| International official APIs | OpenAI, Anthropic Claude, Groq | Responses / Anthropic Messages |
-| China official APIs | DeepSeek, Kimi, MiniMax, Zhipu GLM, Alibaba Qwen | Responses / OpenAI Chat Completions |
-| Third-party or self-hosted APIs | Any Responses-, OpenAI Chat-, or Anthropic-compatible endpoint | Explicit custom adapter |
+| 海外官方 API | OpenAI、Anthropic Claude、Groq | Responses / Anthropic Messages |
+| 国内官方 API | DeepSeek、Kimi、MiniMax、智谱 GLM、阿里千问 | Responses / OpenAI Chat Completions |
+| 第三方中转或自建 API | 任意兼容 Responses、OpenAI Chat、Anthropic 的端点 | 显式选择通用适配器 |
 
-For the full preset list, regional endpoints, and compatibility levels, see [the provider catalog](docs/providers.md).
+完整预设、区域端点和验证分级见 [Provider 清单](docs/providers.md)。Provider 的“支持”必须经过实际协议与工具调用验证，不能只看 HTTP 200 或“OpenAI 兼容”的宣传。
 
-### TokenDance relay example
+### TokenDance 中转示例
 
-TokenDance is configured as a third-party relay, not as a special hard-coded provider. If its selected model exposes a genuine Responses endpoint, configure it through the generic Responses adapter:
+TokenDance 按第三方中转处理，不需要写死为专用 Provider。若目标端点真实支持 Responses，可以使用通用适配器：
 
 ```bash
 python3 skill/external-model-executor/scripts/external_executor.py configure \
@@ -57,43 +54,48 @@ python3 skill/external-model-executor/scripts/external_executor.py configure \
   --api-key-env TOKENDANCE_API_KEY
 ```
 
-Run a live validation before installing the route. A relay can change model availability, protocol support, privacy terms, or tool support without a change to this project.
+安装前先执行 live 验证。中转站的模型可用性、协议、工具能力、计费和数据保留条款都可能变化；示例不代表供应商背书。
 
-## Architecture
+## 最佳实践与落地场景
 
-<p align="center"><img src="assets/readme/architecture.svg" alt="Control plane, adapter plane, and provider plane of Codex External Executor" width="100%"></p>
+先看 [最佳实践](docs/best-practices.md)。最稳妥的通用顺序是：
 
-1. The Skill decides whether to configure a route or delegate a bounded task.
-2. A generated native Codex child-agent profile pins that route for the task.
-3. A loopback-only gateway accepts Codex Responses traffic.
-4. The gateway either passes it through or adapts it to Chat Completions or Anthropic Messages, then converts the result back.
-5. The main Codex Agent checks the result before accepting it.
+```text
+配置 route → 离线校验 → 文本探测 → 工具探测 → 小任务冒烟 → 安装 → 新会话调用
+```
 
-When an upstream API or relay loses native collaboration data, an optional, strict workspace task brief provides the minimum task contract. By default the child gets task-local context, not the complete parent conversation.
+适合从小而可验证的任务开始，例如创建 JSON/YAML fixture、扫描旧模型名称、生成局部测试、整理文档或检查一组字段一致性。每次任务都应明确范围、成功标准、验证方式和停止条件。
 
-## Deployment forms
+## 架构
 
-All forms keep the gateway on the local machine and bind only to `127.0.0.1`. There is no hosted control plane and no global model switch.
+<p align="center"><img src="assets/readme/architecture.svg" alt="Codex External Executor 的控制层、适配层和 Provider 层" width="100%"></p>
 
-| Form | Best for | How it runs |
+1. Skill 识别配置请求或委派请求。
+2. 生成的原生 Codex 子 Agent profile 固定到一个 route。
+3. 只监听 `127.0.0.1` 的网关接收 Responses 请求。
+4. 网关透传 Responses，或转换到 Chat Completions / Anthropic Messages，再把结果转换回来。
+5. 主 Agent 检查证据、变更和测试后再接受结果。
+
+如果上游丢失原生协作消息，可启用 workspace 中的严格任务简报作为降级合同。默认只传递任务所需上下文，不自动发送主对话完整历史。
+
+## 部署形式
+
+| 形式 | 使用场景 | 说明 |
 |---|---|---|
-| Source checkout | Contributors and local testing | Run the bundled Python CLI from this repository |
-| User-local Codex install | Daily use on one machine | Generate and install one route profile under the local Codex configuration |
-| Detached local gateway | Repeated use in a user session | Start the same loopback gateway in the background with the CLI |
-| OS-managed local service | Advanced users | Wrap the gateway command in a user-owned `launchd`, `systemd`, or Windows task; never installed automatically |
+| 源码目录运行 | 开发、评审、本地测试 | 直接执行仓库内 Python CLI |
+| 用户级 Codex 安装 | 日常使用 | 生成并安装指定 route 的原生子 Agent 配置 |
+| 本机后台网关 | 同一登录会话重复调用 | CLI 启动 loopback gateway |
+| OS 用户服务 | 高级用户 | 自行用 `launchd`、`systemd --user` 或 Windows 任务计划包装；项目不会自动安装系统服务 |
 
-See [deployment guidance](docs/deployment.md) for commands and boundaries.
+详细命令见 [部署说明](docs/deployment.md)。所有形式都保持本机回环边界，不提供公共网络网关。
 
-## Quick start
-
-Requirements: Python 3.11 or newer and a current Codex installation with native sub-agent support.
+## 快速开始
 
 ```bash
-git clone https://github.com/YOUR_ACCOUNT/codex-external-executor.git
+git clone https://github.com/shrekcg/codex-external-executor.git
 cd codex-external-executor
 
 python3 skill/external-model-executor/scripts/external_executor.py providers
-
 python3 skill/external-model-executor/scripts/external_executor.py configure \
   --route deepseek \
   --provider deepseek \
@@ -101,73 +103,32 @@ python3 skill/external-model-executor/scripts/external_executor.py configure \
   --api-key-env DEEPSEEK_API_KEY
 
 python3 skill/external-model-executor/scripts/external_executor.py validate --route deepseek
-
 python3 skill/external-model-executor/scripts/external_executor.py codex install \
   --route deepseek --apply
 ```
 
-Restart Codex and open a new conversation. Use the prompt shown above. The Skill starts the local gateway when needed and delegates through the generated native child-agent profile.
+重启 Codex，打开新会话，再使用上面的调用示例。
 
-### Configure another official API
-
-```bash
-python3 skill/external-model-executor/scripts/external_executor.py configure \
-  --route kimi \
-  --provider kimi \
-  --model kimi-k3 \
-  --api-key-env MOONSHOT_API_KEY
-```
-
-Use `openai`, `anthropic`, `groq`, `deepseek`, `minimax-cn`, `minimax-global`, `zhipu`, `qwen-cn`, or `qwen-global` in the same way.
-
-### Configure another relay
-
-Choose the relay's actual endpoint shape:
+## 验证、安全与限制
 
 ```bash
-python3 skill/external-model-executor/scripts/external_executor.py configure \
-  --route my-relay \
-  --provider custom-openai-chat \
-  --model provider/model-id \
-  --base-url https://relay.example.com/v1 \
-  --api-key-env MY_RELAY_API_KEY
-```
-
-Use `custom-responses` only when the relay actually exposes `/responses`. "OpenAI compatible" often means `/chat/completions` only. A narrowly scoped `--drop-request-field <field>` override is available for a Responses relay that rejects an optional Codex field; required execution fields cannot be dropped.
-
-## Validation and safety
-
-```bash
-# Parse configuration only; no external call
+# 只解析配置，不发起外部请求
 python3 skill/external-model-executor/scripts/external_executor.py validate
 
-# Text probe; consumes external API quota
-python3 skill/external-model-executor/scripts/external_executor.py validate --route deepseek --live
+# 文本与工具探测，会消耗外部 API 额度
+python3 skill/external-model-executor/scripts/external_executor.py validate \
+  --route deepseek --live --tools
 
-# Function-calling probe; consumes external API quota
-python3 skill/external-model-executor/scripts/external_executor.py validate --route deepseek --live --tools
-
-# Local test suite; no external credentials or network required
+# 纯本地测试，不需要凭据和网络
 python3 -m unittest discover -s tests -v
 ```
 
-No API key belongs in this repository or its JSON configuration. Use an environment variable, or a trusted local command that prints a credential to stdout. The gateway refuses non-loopback binding. Prompts, selected workspace context, and tool schemas are still sent to the configured upstream, so review each provider's privacy and retention terms before using proprietary code.
+`HTTP 200` 只能说明连通，不能证明完整 Codex 兼容。Translated route 可能缓冲一轮输出；工具、状态、推理字段和模型能力仍取决于 Provider。外部 API 独立计费，但主 Agent 的调度、核验和最终回答仍会消耗 Codex 使用量。Prompt 缓存由上游控制，任务简报不应默认认为能命中缓存。
 
-## Important limitations
+使用敏感代码前请阅读 [限制说明](docs/limitations.md) 和 [安全说明](SECURITY.md)。
 
-- HTTP 200 proves reachability—not full Codex compatibility. Verify text, tools, and a real child task before relying on a route.
-- Native Responses providers still differ in supported fields, tools, state, and reasoning metadata.
-- Chat and Anthropic adapters translate Codex custom tools into ordinary functions with one `input` string. A model that emits malformed tool arguments cannot be fixed by configuration alone.
-- Prompt caching and billing are controlled by the upstream provider. The main Codex Agent still consumes Codex usage for orchestration and final review.
+## 开发与许可
 
-See [limitations](docs/limitations.md) and [SECURITY.md](SECURITY.md) before using an untrusted relay or sensitive repository.
+项目采用可移植的 Agent Skills 目录：精简 `SKILL.md`、按需加载的 `references/`、可执行 `scripts/`、examples 和离线测试。
 
-## Development
-
-The repository follows the portable Skill layout used by the open Agent Skills ecosystem: a concise `SKILL.md`, on-demand `references/`, executable `scripts/`, examples, and offline tests. It can be installed manually into Codex or through tools that discover standard Skill directories.
-
-Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-[MIT](LICENSE)
+贡献方式见 [CONTRIBUTING.md](CONTRIBUTING.md)，许可证为 [MIT](LICENSE)。

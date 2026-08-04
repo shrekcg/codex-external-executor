@@ -1,49 +1,25 @@
-# Task-brief fallback
+# 任务简报降级机制
 
-## Why it exists
+## 为什么存在
 
-Codex normally sends the parent task through the native collaboration message.
-An external Responses implementation or relay can accept the HTTP request while
-still dropping or rejecting parts of Codex's input, including encrypted
-reasoning content, provider-specific message items, or tool history. The child
-can then start with an empty or incomplete task even though authentication and a
-simple text probe succeeded.
+Codex 通常通过原生协作消息发送父任务。某些 Responses 实现或中转站虽然接受 HTTP 请求，却会丢失加密推理内容、Provider 特有消息项或工具历史，导致子 Agent 收到空任务。简报是在当前 workspace 中提供的一份小型、确定性的明文交接合同；它不替代 API 适配器，也不授予额外权限。
 
-The brief provides a small, deterministic plaintext handoff inside the current
-workspace. It does not replace the API adapter and does not grant permissions.
+## 三种模式
 
-## Modes
+- `auto`：可靠性默认值。主 Agent 先创建匹配简报，只有原生消息不可用时子 Agent 才读取。
+- `always`：简报是明确执行合同。适合已知会改写消息的中转站或可重复工作流。
+- `off`：完全依赖原生消息。适合可信 Responses Provider，或不能接受 workspace 明文交接的项目。
 
-- `auto` is the reliability default. The parent creates a matching brief, while
-  the child reads it only when the collaboration message is unusable.
-- `always` makes the brief the explicit contract. Use it for relays known to
-  alter messages or for repeatable workflows.
-- `off` keeps all task context in the native message. Use it for trusted,
-  verified Responses providers or projects where plaintext workspace handoff is
-  unacceptable.
+## 匹配规则
 
-## Matching rules
+子 Agent 只能读取 basename 与自身 task name leaf 完全匹配的文件，必须要求 `schema_version: 1`、精确 `task_name` 和 `status: pending`。不得扫描简报目录寻找替代文件，避免旧任务或无关任务变成指令。
 
-The child may read only the file whose basename exactly matches the leaf of its
-own task name. It must require `schema_version: 1`, an exact `task_name`, and
-`status: pending`. It must never scan the brief directory for alternatives.
+## 隐私与缓存
 
-These rules prevent stale or unrelated briefs from becoming instructions.
+简报是 workspace 明文，可以包含项目事实，但绝不能包含凭据、秘密文件内容或无关对话历史。临时简报目录应加入项目忽略文件。
 
-## Privacy and caching
+创建简报本身不会把内容发送给 Provider；如果子 Agent 读取它，后续工具输出会成为模型输入。稳定的系统指令和工具 schema 可能缓存，但任务简报通常会变化，不应假设命中 prompt cache。
 
-The brief is plaintext in the workspace and can contain project facts. Never put
-credentials, secret file contents, or unrelated conversation history in it.
-Projects should ignore `work/external-model-briefs/` when briefs are temporary.
+## 失败行为
 
-Creating a brief does not by itself send its contents to the provider. If the
-child reads it, the resulting tool output becomes later model input. Stable
-system instructions and tool schemas can still be cached, but task-specific
-brief content normally changes and should not be expected to hit a provider's
-prompt cache.
-
-## Failure behavior
-
-Stop and return control to the parent when the brief is missing, malformed,
-mismatched, already completed, or requests work beyond the child's inherited
-permissions.
+简报缺失、格式错误、任务名不匹配、已经完成或请求超出继承权限时，停止并把控制权交还主 Agent。

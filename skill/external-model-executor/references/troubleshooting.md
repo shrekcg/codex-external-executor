@@ -1,42 +1,29 @@
-# Troubleshooting
+# 排错
 
-## Gateway does not start
+## 网关无法启动
 
-Run `validate` first, then inspect the log path reported by `gateway start`.
-Common causes are invalid JSON, a non-loopback host, an occupied port, or an
-unsupported protocol name.
+先运行 `validate`，再检查 `gateway start` 输出的日志路径。常见原因是 JSON 无效、host 非 loopback、端口被占用或 protocol 名称不支持。
 
-## Authentication works but the child receives no task
+## 认证成功但子 Agent 没收到任务
 
-Use brief mode `auto` or `always`. This is a message-transport compatibility
-failure, not an API-key failure.
+尝试 `brief_mode: auto` 或 `always`。这通常是消息传输兼容性问题，不是 API Key 问题。
 
-## Text works but file edits do not
+## 文本成功但文件修改失败
 
-Run `validate --live --tools`. If that succeeds, test a bounded child task. The
-provider may still reject custom tools, emit malformed JSON arguments, rename
-tools, or fail to continue after tool results.
+运行 `validate --live --tools`，通过后再测试范围很小的子任务。Provider 仍可能拒绝自定义工具、返回非法 JSON 参数、重命名工具或无法在工具结果后继续。
 
-## Custom `apply_patch` fails
+## `apply_patch` 失败
 
-The Chat and Anthropic adapters represent Responses custom tools as ordinary
-functions with one string field named `input`, then translate the returned call
-back. The upstream model must preserve the tool name and produce valid
-arguments. Use normal function tools or a read-only task when the model cannot.
+Chat 和 Anthropic 适配器会把 Responses 自定义工具表示为带一个 `input` 字符串字段的普通函数，再把调用翻译回来。上游模型必须保留工具名并返回合法参数；不满足时改用普通函数工具或只读任务。
 
-## Streaming appears delayed
+## 流式输出延迟
 
-Native Responses routes are streamed through. Translated Chat and Anthropic
-routes currently buffer one upstream turn and then emit valid Responses SSE
-events. Long generations therefore appear after the upstream turn completes.
+原生 Responses route 直接流式转发；转换后的 Chat 和 Anthropic route 会缓冲一轮上游响应，再发出合法 Responses SSE 事件，因此长输出会在一轮完成后出现。
 
-## A relay claims OpenAI compatibility
+## 中转站声称 OpenAI 兼容
 
-Confirm whether it exposes `/responses` or only `/chat/completions`. Use
-`custom-responses` for the former and `custom-openai-chat` for the latter. Then
-run both text and tool probes.
+确认它提供 `/responses` 还是只有 `/chat/completions`。前者用 `custom-responses`，后者用 `custom-openai-chat`，然后分别做文本和工具探测。
 
-## Changes are not visible in a new task
+## 新任务看不到变更
 
-Codex discovers Skill and custom Agent configuration at startup. Restart Codex
-after `codex install --apply`, then create a new conversation.
+Codex 在启动时发现 Skill 和自定义 Agent 配置。执行 `codex install --apply` 后重启 Codex，并新建会话。

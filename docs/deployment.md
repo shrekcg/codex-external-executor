@@ -1,53 +1,53 @@
-# Deployment
+# 部署
 
-Codex External Executor is deliberately local-first. Its gateway listens only on `127.0.0.1`; external model traffic leaves the machine only from that gateway to the provider or relay selected for one route.
+Codex External Executor 采用本机优先设计。网关只监听 `127.0.0.1`；外部模型流量只从本机网关发往当前 route 选择的 Provider 或中转站。
 
-## 1. Source checkout
+## 1. 从源码运行
 
-Use this form for development, review, and local testing.
+适合开发、评审和本地测试：
 
 ```bash
-git clone https://github.com/YOUR_ACCOUNT/codex-external-executor.git
+git clone https://github.com/shrekcg/codex-external-executor.git
 cd codex-external-executor
 python3 -m unittest discover -s tests -v
 python3 skill/external-model-executor/scripts/external_executor.py providers
 ```
 
-## 2. User-local Codex integration
+## 2. 安装到当前用户的 Codex
 
-After configuring and validating a route, generate one native Codex child-agent profile and install it for the current user:
+配置并验证 route 后，预览并安装一个原生 Codex 子 Agent profile：
 
 ```bash
 python3 skill/external-model-executor/scripts/external_executor.py codex preview --route deepseek
 python3 skill/external-model-executor/scripts/external_executor.py codex install --route deepseek --apply
 ```
 
-Restart Codex before testing the generated profile. This does not change the main conversation's model or overwrite unrelated Codex profiles.
+重启 Codex 后再测试生成的 profile。它不会改变主对话模型，也不会覆盖无关的 Codex profile。
 
-## 3. Detached loopback gateway
+## 3. 后台启动本机网关
 
-The Skill starts the gateway when needed. For repeated tasks in one logged-in user session, it can also be started separately:
+Skill 需要时会启动网关。若同一登录会话中会重复执行任务，也可以单独启动：
 
 ```bash
 python3 skill/external-model-executor/scripts/external_executor.py gateway start
 ```
 
-The gateway remains local. Check it with the validation command and stop it using the matching CLI command documented by `gateway --help`.
+网关仍然只在本机工作。用 `validate` 检查状态，并参考 `gateway --help` 使用对应的停止命令。
 
-## 4. OS-managed user service
+## 4. OS 用户服务
 
-Advanced users may wrap the same gateway command in a per-user `launchd` (macOS), `systemd --user` (Linux), or Windows Task Scheduler definition. This repository intentionally does not install a system service: service ownership, Python path, log retention, and credential exposure must remain under the user's control.
+高级用户可以自行用 macOS `launchd`、Linux `systemd --user` 或 Windows 任务计划包装相同的网关命令。本项目不会自动安装系统服务，因为服务归属、Python 路径、日志保留和凭据暴露应由用户控制。
 
-When creating a service, keep these invariants:
+创建服务时必须保持：
 
-- bind only to `127.0.0.1`, never a LAN or public address;
-- pass credentials through an environment manager or secure local command, not a checked-in service file;
-- use a dedicated user account and restrictive file permissions;
-- test restart behavior and API-key availability before relying on it.
+- 只绑定 `127.0.0.1`，不能绑定局域网或公网地址；
+- 通过环境管理器或安全的本地命令提供凭据，不把凭据写入 service 文件；
+- 使用专用用户和受限文件权限；
+- 先测试重启行为与 API Key 可用性，再长期运行。
 
-## Removal
+## 移除
 
-Preview removal first; then apply it. Shared Skill files remain intact.
+先预览，再应用；共享 Skill 文件会保留：
 
 ```bash
 python3 skill/external-model-executor/scripts/external_executor.py codex uninstall --route deepseek

@@ -1,10 +1,8 @@
-# Contributing
+# 贡献指南
 
-Keep changes provider-agnostic and capability-based. A new provider preset must
-link to primary documentation, identify its real protocol, avoid hard-coded
-credentials, and include an offline translation test when it adds behavior.
+保持改动与 Provider 无关，并以能力为基础。新增 Provider preset 时必须链接官方文档，标明真实协议，不写入固定凭据；如果新增转换行为，还要补充离线测试。
 
-Run before submitting:
+提交前运行：
 
 ```bash
 python3 -m unittest discover -s tests -v
@@ -12,5 +10,4 @@ python3 -m py_compile skill/external-model-executor/scripts/external_executor.py
   skill/external-model-executor/scripts/external_executor_lib/*.py
 ```
 
-Do not commit real API responses containing user prompts, API keys, private URLs,
-or proprietary source code.
+不要提交包含用户提示词、API Key、私有 URL 或专有源代码的真实 API 响应。
