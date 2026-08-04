@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330" role="img" aria-labelledby="title desc">
+  <title id="title">外部 route 的验证闭环</title>
+  <desc id="desc">从选择 route、配置、离线与实时验证、安装原生子 Agent，到主 Agent 验收结果的六步流程。</desc>
+  <rect width="1200" height="330" rx="28" fill="#F5F8FC"/>
+  <path d="M58 112H1142" stroke="#D7E0EB"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+    <text x="58" y="62" fill="#10233A" font-size="35" font-weight="760">从 route 到验收：六步闭环</text>
+    <text x="58" y="94" fill="#64748B" font-size="17">先证明链路可用，再把任务交给外部模型；最终判断权始终留在主 Agent。</text>
+  </g>
+  <g transform="translate(58 150)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+    <g><rect width="158" height="112" rx="18" fill="#FFFFFF" stroke="#D6E1EC"/><text x="22" y="35" fill="#0F8D8A" font-size="16" font-weight="700">01</text><text x="22" y="69" fill="#14263D" font-size="20" font-weight="700">选择 route</text><text x="22" y="92" fill="#64748B" font-size="13">Provider 与真实协议</text></g>
+    <path d="M166 56H190" stroke="#46B8B2" stroke-width="3"/><path d="M182 48L192 56L182 64" fill="none" stroke="#46B8B2" stroke-width="3"/>
+    <g transform="translate(202)"><rect width="158" height="112" rx="18" fill="#FFFFFF" stroke="#D6E1EC"/><text x="22" y="35" fill="#0F8D8A" font-size="16" font-weight="700">02</text><text x="22" y="69" fill="#14263D" font-size="20" font-weight="700">配置凭据</text><text x="22" y="92" fill="#64748B" font-size="13">环境变量或本地命令</text></g>
+    <path d="M368 56H392" stroke="#46B8B2" stroke-width="3"/><path d="M384 48L394 56L384 64" fill="none" stroke="#46B8B2" stroke-width="3"/>
+    <g transform="translate(404)"><rect width="158" height="112" rx="18" fill="#FFFFFF" stroke="#D6E1EC"/><text x="22" y="35" fill="#0F8D8A" font-size="16" font-weight="700">03</text><text x="22" y="69" fill="#14263D" font-size="20" font-weight="700">离线校验</text><text x="22" y="92" fill="#64748B" font-size="13">配置与网关边界</text></g>
+    <path d="M570 56H594" stroke="#46B8B2" stroke-width="3"/><path d="M586 48L596 56L586 64" fill="none" stroke="#46B8B2" stroke-width="3"/>
+    <g transform="translate(606)"><rect width="158" height="112" rx="18" fill="#FFFFFF" stroke="#D6E1EC"/><text x="22" y="35" fill="#0F8D8A" font-size="16" font-weight="700">04</text><text x="22" y="69" fill="#14263D" font-size="20" font-weight="700">实时与工具探测</text><text x="22" y="92" fill="#64748B" font-size="13">文本、工具、协议</text></g>
+    <path d="M772 56H796" stroke="#46B8B2" stroke-width="3"/><path d="M788 48L798 56L788 64" fill="none" stroke="#46B8B2" stroke-width="3"/>
+    <g transform="translate(808)"><rect width="158" height="112" rx="18" fill="#FFFFFF" stroke="#D6E1EC"/><text x="22" y="35" fill="#0F8D8A" font-size="16" font-weight="700">05</text><text x="22" y="69" fill="#14263D" font-size="20" font-weight="700">小任务冒烟</text><text x="22" y="92" fill="#64748B" font-size="13">限定范围与可复查输出</text></g>
+    <path d="M974 56H998" stroke="#46B8B2" stroke-width="3"/><path d="M990 48L1000 56L990 64" fill="none" stroke="#46B8B2" stroke-width="3"/>
+    <g transform="translate(1010)"><rect width="132" height="112" rx="18" fill="#102B42" stroke="#1B6473"/><text x="20" y="35" fill="#56DDD4" font-size="16" font-weight="700">06</text><text x="20" y="69" fill="#FFFFFF" font-size="20" font-weight="700">主 Agent</text><text x="20" y="92" fill="#B7D9D7" font-size="13">验收与交付</text></g>
+  </g>
+</svg>
